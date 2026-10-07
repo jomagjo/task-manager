@@ -4,6 +4,15 @@
   {% csrf_token %} {{ form.non_field_errors }}
 
   <p>
+    <label for="mic-lang-select">Dictation language</label>
+    <select id="mic-lang-select">
+      <option value="en-US">English</option>
+      <option value="hi-IN">Hindi</option>
+      <option value="te-IN">Telugu</option>
+    </select>
+  </p>
+
+  <p>
     {{ form.title.label_tag }}
     <span class="field-with-mic">
       {{ form.title }}
@@ -50,6 +59,8 @@
     var SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
     var micButtons = document.querySelectorAll(".mic-btn");
+    var langSelect = document.getElementById("mic-lang-select");
+    var SILENCE_TIMEOUT_MS = 7000;
 
     if (!SpeechRecognition) {
       micButtons.forEach(function (btn) {
@@ -64,10 +75,17 @@
       var recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = "en-US";
 
       var listening = false;
       var baseValue = "";
+      var silenceTimer = null;
+
+      function resetSilenceTimer() {
+        clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(function () {
+          recognition.stop();
+        }, SILENCE_TIMEOUT_MS);
+      }
 
       recognition.onresult = function (event) {
         var transcript = "";
@@ -75,16 +93,19 @@
           transcript += event.results[i][0].transcript;
         }
         field.value = (baseValue ? baseValue + " " : "") + transcript;
+        resetSilenceTimer();
       };
 
       recognition.onend = function () {
         listening = false;
+        clearTimeout(silenceTimer);
         btn.classList.remove("listening");
         btn.textContent = "🎤";
       };
 
       recognition.onerror = function () {
         listening = false;
+        clearTimeout(silenceTimer);
         btn.classList.remove("listening");
         btn.textContent = "🎤";
       };
@@ -95,10 +116,12 @@
           return;
         }
         baseValue = field.value.trim();
+        recognition.lang = langSelect.value;
         recognition.start();
         listening = true;
         btn.classList.add("listening");
         btn.textContent = "⏹";
+        resetSilenceTimer();
       });
     });
   })();
