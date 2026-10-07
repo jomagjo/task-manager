@@ -9,6 +9,7 @@
       <th>Description</th>
       <th>Due Date</th>
       <th>Status</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -22,10 +23,15 @@
           >{{ task.get_status_display }}</span
         >
       </td>
+      <td>
+        <a href="{% url 'task_edit' task.pk %}">Edit</a>
+        &nbsp;|&nbsp;
+        <a href="{% url 'task_delete' task.pk %}">Delete</a>
+      </td>
     </tr>
     {% empty %}
     <tr>
-      <td colspan="4">No tasks yet.</td>
+      <td colspan="5">No tasks yet.</td>
     </tr>
     {% endfor %}
   </tbody>
