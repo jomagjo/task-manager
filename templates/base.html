@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Task Manager</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 16px;
+        color: #222;
+      }
+      h1 {
+        margin-bottom: 24px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+      }
+      .status {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.85em;
+      }
+      .status-pending {
+        background: #f0ad4e;
+        color: #fff;
+      }
+      .status-in_progress {
+        background: #5bc0de;
+        color: #fff;
+      }
+      .status-completed {
+        background: #5cb85c;
+        color: #fff;
+      }
+      .btn {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #333;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 4px;
+      }
+      form p {
+        margin-bottom: 12px;
+      }
+      label {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: bold;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 6px;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    {% block content %}{% endblock %}
+  </body>
+</html>
