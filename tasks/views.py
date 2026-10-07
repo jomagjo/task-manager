@@ -1,7 +1,9 @@
 from django.shortcuts import redirect, render
+from rest_framework import generics
 
 from .forms import TaskForm
 from .models import Task
+from .serializers import TaskSerializer
 
 
 def task_list(request):
@@ -18,3 +20,8 @@ def task_add(request):
     else:
         form = TaskForm()
     return render(request, "tasks/task_form.html", {"form": form})
+
+
+class TaskListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
