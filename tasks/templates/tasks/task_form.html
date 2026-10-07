@@ -1,8 +1,106 @@
 {% extends "base.html" %} {% block content %}
 <h1>{% if task %}Edit Task{% else %}Add Task{% endif %}</h1>
 <form method="post">
-  {% csrf_token %} {{ form.as_p }}
+  {% csrf_token %} {{ form.non_field_errors }}
+
+  <p>
+    {{ form.title.label_tag }}
+    <span class="field-with-mic">
+      {{ form.title }}
+      <button
+        type="button"
+        class="mic-btn"
+        data-target="{{ form.title.id_for_label }}"
+        title="Dictate title"
+      >
+        🎤
+      </button>
+    </span>
+    {{ form.title.errors }}
+  </p>
+
+  <p>
+    {{ form.description.label_tag }}
+    <span class="field-with-mic">
+      {{ form.description }}
+      <button
+        type="button"
+        class="mic-btn"
+        data-target="{{ form.description.id_for_label }}"
+        title="Dictate description"
+      >
+        🎤
+      </button>
+    </span>
+    {{ form.description.errors }}
+  </p>
+
+  <p>
+    {{ form.due_date.label_tag }} {{ form.due_date }} {{ form.due_date.errors }}
+  </p>
+
+  <p>{{ form.status.label_tag }} {{ form.status }} {{ form.status.errors }}</p>
+
   <button class="btn" type="submit">Save Task</button>
 </form>
 <p><a href="{% url 'task_list' %}">&larr; Back to list</a></p>
+
+<script>
+  (function () {
+    var SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    var micButtons = document.querySelectorAll(".mic-btn");
+
+    if (!SpeechRecognition) {
+      micButtons.forEach(function (btn) {
+        btn.disabled = true;
+        btn.title = "Voice dictation isn't supported in this browser";
+      });
+      return;
+    }
+
+    micButtons.forEach(function (btn) {
+      var field = document.getElementById(btn.dataset.target);
+      var recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      var listening = false;
+      var baseValue = "";
+
+      recognition.onresult = function (event) {
+        var transcript = "";
+        for (var i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        field.value = (baseValue ? baseValue + " " : "") + transcript;
+      };
+
+      recognition.onend = function () {
+        listening = false;
+        btn.classList.remove("listening");
+        btn.textContent = "🎤";
+      };
+
+      recognition.onerror = function () {
+        listening = false;
+        btn.classList.remove("listening");
+        btn.textContent = "🎤";
+      };
+
+      btn.addEventListener("click", function () {
+        if (listening) {
+          recognition.stop();
+          return;
+        }
+        baseValue = field.value.trim();
+        recognition.start();
+        listening = true;
+        btn.classList.add("listening");
+        btn.textContent = "⏹";
+      });
+    });
+  })();
+</script>
 {% endblock %}
