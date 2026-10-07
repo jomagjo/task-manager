@@ -82,22 +82,30 @@
 
       var listening = false;
       var baseValue = "";
+      var currentLang = "en-US";
 
       recognition.onresult = function (event) {
+        var stopPhraseActive = currentLang === "en-US";
         var transcript = "";
         var stopDetected = false;
         for (var i = 0; i < event.results.length; i++) {
           var segment = event.results[i][0].transcript;
           transcript += segment;
-          if (event.results[i].isFinal && containsStopPhrase(segment)) {
+          if (
+            stopPhraseActive &&
+            event.results[i].isFinal &&
+            containsStopPhrase(segment)
+          ) {
             stopDetected = true;
           }
         }
 
-        var cleaned = transcript
-          .replace(STOP_PHRASE_PATTERN, "")
-          .replace(/\s{2,}/g, " ")
-          .trim();
+        var cleaned = stopPhraseActive
+          ? transcript
+              .replace(STOP_PHRASE_PATTERN, "")
+              .replace(/\s{2,}/g, " ")
+              .trim()
+          : transcript;
         field.value = (baseValue ? baseValue + " " : "") + cleaned;
 
         if (stopDetected) {
@@ -123,7 +131,8 @@
           return;
         }
         baseValue = field.value.trim();
-        recognition.lang = langSelect.value;
+        currentLang = langSelect.value;
+        recognition.lang = currentLang;
         recognition.start();
         listening = true;
         btn.classList.add("listening");
