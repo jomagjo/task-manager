@@ -60,7 +60,7 @@
       window.SpeechRecognition || window.webkitSpeechRecognition;
     var micButtons = document.querySelectorAll(".mic-btn");
     var langSelect = document.getElementById("mic-lang-select");
-    var SILENCE_TIMEOUT_MS = 7000;
+    var STOP_PHRASE_PATTERN = /speech\s*,?\.?\s*done\s*[.,!]?/gi;
 
     if (!SpeechRecognition) {
       micButtons.forEach(function (btn) {
@@ -68,6 +68,10 @@
         btn.title = "Voice dictation isn't supported in this browser";
       });
       return;
+    }
+
+    function containsStopPhrase(text) {
+      return /speech\s*,?\.?\s*done/i.test(text);
     }
 
     micButtons.forEach(function (btn) {
@@ -78,34 +82,37 @@
 
       var listening = false;
       var baseValue = "";
-      var silenceTimer = null;
-
-      function resetSilenceTimer() {
-        clearTimeout(silenceTimer);
-        silenceTimer = setTimeout(function () {
-          recognition.stop();
-        }, SILENCE_TIMEOUT_MS);
-      }
 
       recognition.onresult = function (event) {
         var transcript = "";
+        var stopDetected = false;
         for (var i = 0; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
+          var segment = event.results[i][0].transcript;
+          transcript += segment;
+          if (event.results[i].isFinal && containsStopPhrase(segment)) {
+            stopDetected = true;
+          }
         }
-        field.value = (baseValue ? baseValue + " " : "") + transcript;
-        resetSilenceTimer();
+
+        var cleaned = transcript
+          .replace(STOP_PHRASE_PATTERN, "")
+          .replace(/\s{2,}/g, " ")
+          .trim();
+        field.value = (baseValue ? baseValue + " " : "") + cleaned;
+
+        if (stopDetected) {
+          recognition.stop();
+        }
       };
 
       recognition.onend = function () {
         listening = false;
-        clearTimeout(silenceTimer);
         btn.classList.remove("listening");
         btn.textContent = "🎤";
       };
 
       recognition.onerror = function () {
         listening = false;
-        clearTimeout(silenceTimer);
         btn.classList.remove("listening");
         btn.textContent = "🎤";
       };
@@ -121,7 +128,6 @@
         listening = true;
         btn.classList.add("listening");
         btn.textContent = "⏹";
-        resetSilenceTimer();
       });
     });
   })();
