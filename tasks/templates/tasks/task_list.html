@@ -6,7 +6,7 @@
   type="text"
   id="title-search"
   class="search-input"
-  placeholder="Search by title..."
+  placeholder="Search by title or description..."
 />
 
 <table>
@@ -28,7 +28,10 @@
   </thead>
   <tbody>
     {% for task in tasks %}
-    <tr class="status-row status-row-{{ task.status }}">
+    <tr
+      class="status-row status-row-{{ task.status }}"
+      data-description="{{ task.description }}"
+    >
       <td class="task-title">{{ task.title }}</td>
       <td>
         {% if task.description %} {% if task.description|length > 50 %}
@@ -95,7 +98,9 @@
       rows.forEach(function (row) {
         var titleCell = row.querySelector(".task-title");
         var title = titleCell ? titleCell.textContent.toLowerCase() : "";
-        var matches = title.indexOf(query) !== -1;
+        var description = (row.dataset.description || "").toLowerCase();
+        var matches =
+          title.indexOf(query) !== -1 || description.indexOf(query) !== -1;
         row.style.display = matches ? "" : "none";
         if (matches) {
           visibleCount += 1;
