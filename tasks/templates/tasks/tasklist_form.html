@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block content %}
+<h1>New Task List</h1>
+<form method="post">
+  {% csrf_token %} {{ form.non_field_errors }}
+  <p>{{ form.name.label_tag }} {{ form.name }} {{ form.name.errors }}</p>
+  <p>
+    {{ form.category.label_tag }} {{ form.category }} {{ form.category.errors }}
+  </p>
+  <p id="custom-label-field">
+    {{ form.custom_category_label.label_tag }} {{ form.custom_category_label }}
+    {{ form.custom_category_label.errors }}
+  </p>
+  <button class="btn" type="submit">Create List</button>
+</form>
+<p><a href="{% url 'tasklist_summary' %}">&larr; All Lists</a></p>
+
+<script>
+  (function () {
+    var categorySelect = document.querySelector('[name="category"]');
+    var customField = document.getElementById("custom-label-field");
+
+    function toggleCustomField() {
+      customField.style.display =
+        categorySelect.value === "custom" ? "" : "none";
+    }
+
+    categorySelect.addEventListener("change", toggleCustomField);
+    toggleCustomField();
+  })();
+</script>
+{% endblock %}

@@ -1,13 +1,14 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
-from .forms import SignupForm, TaskForm
-from .models import Task
+from .forms import SignupForm, TaskForm, TaskListForm
+from .models import Task, TaskList
 from .serializers import TaskSerializer
 
 
@@ -17,63 +18,112 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect("task_list")
+            return redirect("tasklist_summary")
     else:
         form = SignupForm()
     return render(request, "tasks/signup.html", {"form": form})
 
 
 @login_required
-def task_list(request):
-    tasks = Task.objects.filter(user=request.user)
-    return render(request, "tasks/task_list.html", {"tasks": tasks})
+def tasklist_summary(request):
+    task_lists = TaskList.objects.filter(user=request.user).annotate(
+        total_count=Count("tasks"),
+        done_count=Count(
+            "tasks", filter=Q(tasks__status=Task.Status.COMPLETED)
+        ),
+    )
+    return render(
+        request, "tasks/tasklist_summary.html", {"task_lists": task_lists}
+    )
 
 
 @login_required
-def task_add(request):
+def tasklist_create(request):
+    if request.method == "POST":
+        form = TaskListForm(request.POST)
+        if form.is_valid():
+            task_list = form.save(commit=False)
+            task_list.user = request.user
+            task_list.save()
+            return redirect("tasklist_detail", pk=task_list.pk)
+    else:
+        form = TaskListForm()
+    return render(request, "tasks/tasklist_form.html", {"form": form})
+
+
+@login_required
+def tasklist_detail(request, pk):
+    task_list = get_object_or_404(TaskList, pk=pk, user=request.user)
+    tasks = task_list.tasks.all()
+    return render(
+        request,
+        "tasks/tasklist_detail.html",
+        {"task_list_obj": task_list, "tasks": tasks},
+    )
+
+
+@login_required
+def task_add(request, list_pk):
+    task_list = get_object_or_404(TaskList, pk=list_pk, user=request.user)
     if request.method == "POST":
         form = TaskForm(request.POST)
         if form.is_valid():
             task = form.save(commit=False)
-            task.user = request.user
+            task.task_list = task_list
             task.save()
-            return redirect("task_list")
+            return redirect("tasklist_detail", pk=task_list.pk)
     else:
         form = TaskForm()
-    return render(request, "tasks/task_form.html", {"form": form})
+    return render(
+        request, "tasks/task_form.html", {"form": form, "task_list_obj": task_list}
+    )
 
 
 @login_required
-def task_edit(request, pk):
-    task = get_object_or_404(Task, pk=pk, user=request.user)
+def task_edit(request, list_pk, pk):
+    task = get_object_or_404(
+        Task, pk=pk, task_list_id=list_pk, task_list__user=request.user
+    )
     if request.method == "POST":
         form = TaskForm(request.POST, instance=task)
         if form.is_valid():
             form.save()
-            return redirect("task_list")
+            return redirect("tasklist_detail", pk=list_pk)
     else:
         form = TaskForm(instance=task)
-    return render(request, "tasks/task_form.html", {"form": form, "task": task})
+    return render(
+        request,
+        "tasks/task_form.html",
+        {"form": form, "task": task, "task_list_obj": task.task_list},
+    )
 
 
 @login_required
 @require_POST
-def task_update_status(request, pk):
-    task = get_object_or_404(Task, pk=pk, user=request.user)
+def task_update_status(request, list_pk, pk):
+    task = get_object_or_404(
+        Task, pk=pk, task_list_id=list_pk, task_list__user=request.user
+    )
     status = request.POST.get("status")
     if status in Task.Status.values:
         task.status = status
         task.save(update_fields=["status"])
-    return redirect("task_list")
+    return redirect("tasklist_detail", pk=list_pk)
 
 
 @login_required
-def task_delete(request, pk):
-    task = get_object_or_404(Task, pk=pk, user=request.user)
+def task_delete(request, list_pk, pk):
+    task = get_object_or_404(
+        Task, pk=pk, task_list_id=list_pk, task_list__user=request.user
+    )
     if request.method == "POST":
         task.delete()
-        return redirect("task_list")
-    return render(request, "tasks/task_confirm_delete.html", {"task": task})
+        return redirect("tasklist_detail", pk=list_pk)
+    return render(
+        request,
+        "tasks/task_confirm_delete.html",
+        {"task": task, "task_list_obj": task.task_list},
+    )
 
 
 class TaskListCreateAPIView(generics.ListCreateAPIView):
@@ -81,10 +131,7 @@ class TaskListCreateAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Task.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        return Task.objects.filter(task_list__user=self.request.user)
 
 
 class TaskRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -92,4 +139,4 @@ class TaskRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Task.objects.filter(user=self.request.user)
+        return Task.objects.filter(task_list__user=self.request.user)

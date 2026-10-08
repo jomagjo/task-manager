@@ -1,6 +1,9 @@
 {% extends "base.html" %} {% block content %}
-<h1>Get these Tasks Done, {{ user.username }}!</h1>
-<a class="btn" href="{% url 'task_add' %}">+ Add Task</a>
+<p><a href="{% url 'tasklist_summary' %}">&larr; All Lists</a></p>
+<h1>
+  {{ task_list_obj.name }} <small>({{ task_list_obj.category_display }})</small>
+</h1>
+<a class="btn" href="{% url 'task_add' task_list_obj.pk %}">+ Add Task</a>
 
 <div class="search-bar">
   <input
@@ -66,7 +69,7 @@
       <td>
         <form
           method="post"
-          action="{% url 'task_update_status' task.pk %}"
+          action="{% url 'task_update_status' task_list_obj.pk task.pk %}"
           class="status-form"
         >
           {% csrf_token %}
@@ -84,9 +87,9 @@
         </form>
       </td>
       <td>
-        <a href="{% url 'task_edit' task.pk %}">Edit</a>
+        <a href="{% url 'task_edit' task_list_obj.pk task.pk %}">Edit</a>
         &nbsp;|&nbsp;
-        <a href="{% url 'task_delete' task.pk %}">Delete</a>
+        <a href="{% url 'task_delete' task_list_obj.pk task.pk %}">Delete</a>
       </td>
     </tr>
     {% empty %}

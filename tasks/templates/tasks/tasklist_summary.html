@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block content %}
+<h1>Get these Tasks Done, {{ user.username }}!</h1>
+<a class="btn" href="{% url 'tasklist_create' %}">+ New List</a>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Progress</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for task_list in task_lists %}
+    <tr>
+      <td>
+        <a href="{% url 'tasklist_detail' task_list.pk %}"
+          >{{ task_list.name }}</a
+        >
+      </td>
+      <td>{{ task_list.category_display }}</td>
+      <td>{{ task_list.done_count }} of {{ task_list.total_count }} done</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="3">No task lists yet. Create one to get started.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
