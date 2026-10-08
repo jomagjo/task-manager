@@ -2,12 +2,27 @@
 <h1>Get these Tasks Done, {{ user.username }}!</h1>
 <a class="btn" href="{% url 'task_add' %}">+ Add Task</a>
 
-<input
-  type="text"
-  id="title-search"
-  class="search-input"
-  placeholder="Search by title or description..."
-/>
+<div class="search-bar">
+  <input
+    type="text"
+    id="title-search"
+    class="search-input"
+    placeholder="Search by title or description..."
+  />
+  <select id="search-lang-select" class="search-lang-select">
+    <option value="en-US">English</option>
+    <option value="hi-IN">Hindi</option>
+    <option value="te-IN">Telugu</option>
+  </select>
+  <button
+    type="button"
+    id="search-mic-btn"
+    class="mic-btn"
+    title="Dictate search"
+  >
+    🎤
+  </button>
+</div>
 
 <table>
   <colgroup>
@@ -91,7 +106,7 @@
     var rows = document.querySelectorAll("tr.status-row");
     var noResultsRow = document.getElementById("no-results-row");
 
-    searchInput.addEventListener("input", function () {
+    function filterRows() {
       var query = searchInput.value.trim().toLowerCase();
       var visibleCount = 0;
 
@@ -108,6 +123,58 @@
       });
 
       noResultsRow.style.display = visibleCount === 0 ? "" : "none";
+    }
+
+    searchInput.addEventListener("input", filterRows);
+
+    var SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    var micBtn = document.getElementById("search-mic-btn");
+    var langSelect = document.getElementById("search-lang-select");
+
+    if (!SpeechRecognition) {
+      micBtn.disabled = true;
+      micBtn.title = "Voice dictation isn't supported in this browser";
+      return;
+    }
+
+    var recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    var listening = false;
+
+    recognition.onresult = function (event) {
+      var transcript = "";
+      for (var i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      searchInput.value = transcript.trim();
+      filterRows();
+    };
+
+    recognition.onend = function () {
+      listening = false;
+      micBtn.classList.remove("listening");
+      micBtn.textContent = "🎤";
+    };
+
+    recognition.onerror = function () {
+      listening = false;
+      micBtn.classList.remove("listening");
+      micBtn.textContent = "🎤";
+    };
+
+    micBtn.addEventListener("click", function () {
+      if (listening) {
+        recognition.stop();
+        return;
+      }
+      recognition.lang = langSelect.value;
+      recognition.start();
+      listening = true;
+      micBtn.classList.add("listening");
+      micBtn.textContent = "⏹";
     });
   })();
 </script>
