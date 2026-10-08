@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% block content %}
-<h1>Tasks</h1>
+<h1>Get these Tasks Done, {{ user.username }}</h1>
 <a class="btn" href="{% url 'task_add' %}">+ Add Task</a>
 
 <table>
