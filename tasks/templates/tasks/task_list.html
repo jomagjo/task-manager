@@ -24,16 +24,18 @@
     <tr>
       <td>{{ task.title }}</td>
       <td>
-        {% if task.description %}
+        {% if task.description %} {% if task.description|length > 50 %}
         <details class="description-details">
           <summary class="description-summary">
             <span class="description-preview"
-              >{{ task.description|truncatechars:50 }}</span
-            ><span class="expand-indicator">more</span>
+              >{{ task.description|slice:":49" }}…</span
+            ><span class="expand-indicator">&#9656;</span>
           </summary>
-          <div class="description-full">{{ task.description }}</div>
+          <span class="description-continuation"
+            >{{ task.description|slice:"49:" }}</span
+          >
         </details>
-        {% endif %}
+        {% else %} {{ task.description }} {% endif %} {% endif %}
       </td>
       <td>{{ task.due_date }}</td>
       <td>

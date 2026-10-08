@@ -47,11 +47,16 @@
       }
       .expand-indicator {
         flex-shrink: 0;
+        display: inline-block;
         color: #5bc0de;
-        font-size: 0.85em;
+        transition: transform 0.15s ease;
       }
-      .description-full {
-        margin-top: 6px;
+      .description-details[open] .expand-indicator {
+        transform: rotate(90deg);
+      }
+      .description-continuation {
+        display: block;
+        margin-top: 2px;
         white-space: pre-wrap;
         word-break: break-word;
       }
