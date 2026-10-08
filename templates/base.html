@@ -95,9 +95,32 @@
         background: #ccc;
         cursor: not-allowed;
       }
+      .navbar {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 16px;
+        font-size: 0.9em;
+      }
     </style>
   </head>
   <body>
+    <div class="navbar">
+      {% if user.is_authenticated %}
+      <span>Logged in as <strong>{{ user.username }}</strong></span>
+      <form method="post" action="{% url 'logout' %}" style="margin: 0">
+        {% csrf_token %}
+        <button type="submit" class="btn" style="padding: 2px 10px">
+          Log Out
+        </button>
+      </form>
+      {% else %}
+      <a href="{% url 'login' %}">Log In</a>
+      <a href="{% url 'signup' %}">Sign Up</a>
+      {% endif %}
+    </div>
     {% block content %}{% endblock %}
   </body>
 </html>
