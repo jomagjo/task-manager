@@ -23,7 +23,18 @@
     {% for task in tasks %}
     <tr>
       <td>{{ task.title }}</td>
-      <td>{{ task.description }}</td>
+      <td>
+        {% if task.description %}
+        <details class="description-details">
+          <summary>
+            <span class="description-preview"
+              >{{ task.description|truncatechars:50 }}</span
+            >
+          </summary>
+          <div class="description-full">{{ task.description }}</div>
+        </details>
+        {% endif %}
+      </td>
       <td>{{ task.due_date }}</td>
       <td>
         <span class="status status-{{ task.status }}"
