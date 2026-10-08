@@ -2,6 +2,13 @@
 <h1>Get these Tasks Done, {{ user.username }}!</h1>
 <a class="btn" href="{% url 'task_add' %}">+ Add Task</a>
 
+<input
+  type="text"
+  id="title-search"
+  class="search-input"
+  placeholder="Search by title..."
+/>
+
 <table>
   <colgroup>
     <col style="width: 20%" />
@@ -22,7 +29,7 @@
   <tbody>
     {% for task in tasks %}
     <tr class="status-row status-row-{{ task.status }}">
-      <td>{{ task.title }}</td>
+      <td class="task-title">{{ task.title }}</td>
       <td>
         {% if task.description %} {% if task.description|length > 50 %}
         <details class="description-details">
@@ -69,6 +76,34 @@
       <td colspan="5">No tasks yet.</td>
     </tr>
     {% endfor %}
+    <tr id="no-results-row" style="display: none">
+      <td colspan="5">No matching tasks.</td>
+    </tr>
   </tbody>
 </table>
+
+<script>
+  (function () {
+    var searchInput = document.getElementById("title-search");
+    var rows = document.querySelectorAll("tr.status-row");
+    var noResultsRow = document.getElementById("no-results-row");
+
+    searchInput.addEventListener("input", function () {
+      var query = searchInput.value.trim().toLowerCase();
+      var visibleCount = 0;
+
+      rows.forEach(function (row) {
+        var titleCell = row.querySelector(".task-title");
+        var title = titleCell ? titleCell.textContent.toLowerCase() : "";
+        var matches = title.indexOf(query) !== -1;
+        row.style.display = matches ? "" : "none";
+        if (matches) {
+          visibleCount += 1;
+        }
+      });
+
+      noResultsRow.style.display = visibleCount === 0 ? "" : "none";
+    });
+  })();
+</script>
 {% endblock %}
