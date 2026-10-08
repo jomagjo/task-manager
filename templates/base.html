@@ -25,16 +25,30 @@
         padding: 8px;
         border-bottom: 1px solid #ddd;
       }
-      .description-details summary {
+      .description-summary {
         cursor: pointer;
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+        max-width: 100%;
+        list-style: none;
+      }
+      .description-summary::-webkit-details-marker {
+        display: none;
+      }
+      .description-summary::marker {
+        content: "";
       }
       .description-preview {
-        display: inline-block;
-        max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        vertical-align: bottom;
+        min-width: 0;
+      }
+      .expand-indicator {
+        flex-shrink: 0;
+        color: #5bc0de;
+        font-size: 0.85em;
       }
       .description-full {
         margin-top: 6px;

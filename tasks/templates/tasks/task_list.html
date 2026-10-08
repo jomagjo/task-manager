@@ -26,10 +26,10 @@
       <td>
         {% if task.description %}
         <details class="description-details">
-          <summary>
+          <summary class="description-summary">
             <span class="description-preview"
               >{{ task.description|truncatechars:50 }}</span
-            >
+            ><span class="expand-indicator">more</span>
           </summary>
           <div class="description-full">{{ task.description }}</div>
         </details>
