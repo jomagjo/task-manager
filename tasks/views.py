@@ -1,6 +1,8 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
@@ -52,6 +54,17 @@ def task_edit(request, pk):
     else:
         form = TaskForm(instance=task)
     return render(request, "tasks/task_form.html", {"form": form, "task": task})
+
+
+@login_required
+@require_POST
+def task_update_status(request, pk):
+    task = get_object_or_404(Task, pk=pk, user=request.user)
+    status = request.POST.get("status")
+    if status in Task.Status.values:
+        task.status = status
+        task.save(update_fields=["status"])
+    return redirect("task_list")
 
 
 @login_required

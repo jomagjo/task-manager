@@ -24,3 +24,10 @@ class Task(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def status_options(self):
+        choices = list(self.Status.choices)
+        current = next(c for c in choices if c[0] == self.status)
+        choices.remove(current)
+        return [current] + choices

@@ -60,24 +60,43 @@
         white-space: pre-wrap;
         word-break: break-word;
       }
-      .status {
-        display: inline-block;
-        padding: 2px 8px;
+      .status-row-pending {
+        background: #ffe0b2;
+      }
+      .status-row-in_progress {
+        background: #c8e6c9;
+      }
+      .status-row-completed {
+        background: #ffcdd2;
+      }
+      .status-form {
+        margin: 0;
+      }
+      .status-select {
+        width: auto;
+        padding: 4px 8px;
+        border: 1px solid rgba(0, 0, 0, 0.2);
         border-radius: 4px;
-        font-size: 0.85em;
-        white-space: nowrap;
+        font-size: 0.9em;
+        cursor: pointer;
       }
-      .status-pending {
-        background: #f0ad4e;
-        color: #fff;
+      .status-select-pending {
+        background: #ffe0b2;
       }
-      .status-in_progress {
-        background: #5bc0de;
-        color: #fff;
+      .status-select-in_progress {
+        background: #c8e6c9;
       }
-      .status-completed {
-        background: #5cb85c;
-        color: #fff;
+      .status-select-completed {
+        background: #ffcdd2;
+      }
+      .status-option-pending {
+        background: #ffe0b2;
+      }
+      .status-option-in_progress {
+        background: #c8e6c9;
+      }
+      .status-option-completed {
+        background: #ffcdd2;
       }
       .btn {
         display: inline-block;

@@ -21,7 +21,7 @@
   </thead>
   <tbody>
     {% for task in tasks %}
-    <tr>
+    <tr class="status-row status-row-{{ task.status }}">
       <td>{{ task.title }}</td>
       <td>
         {% if task.description %} {% if task.description|length > 50 %}
@@ -39,9 +39,24 @@
       </td>
       <td>{{ task.due_date }}</td>
       <td>
-        <span class="status status-{{ task.status }}"
-          >{{ task.get_status_display }}</span
+        <form
+          method="post"
+          action="{% url 'task_update_status' task.pk %}"
+          class="status-form"
         >
+          {% csrf_token %}
+          <select
+            name="status"
+            class="status-select status-select-{{ task.status }}"
+            onchange="this.form.submit()"
+          >
+            {% for value, label in task.status_options %}
+            <option value="{{ value }}" class="status-option-{{ value }}">
+              {{ label }}
+            </option>
+            {% endfor %}
+          </select>
+        </form>
       </td>
       <td>
         <a href="{% url 'task_edit' task.pk %}">Edit</a>
