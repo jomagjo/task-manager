@@ -26,10 +26,20 @@ urlpatterns = [
         name="login",
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
-    path("api/tasks/", views.TaskListCreateAPIView.as_view(), name="task_api_list_create"),
+    path("api/tasks/", views.TaskCollectionAPIView.as_view(), name="task_api_list_create"),
     path(
         "api/tasks/<int:pk>/",
-        views.TaskRetrieveUpdateDestroyAPIView.as_view(),
+        views.TaskDetailAPIView.as_view(),
         name="task_api_detail",
+    ),
+    path(
+        "api/lists/",
+        views.TaskListCollectionAPIView.as_view(),
+        name="tasklist_api_list_create",
+    ),
+    path(
+        "api/lists/<int:pk>/",
+        views.TaskListDetailAPIView.as_view(),
+        name="tasklist_api_detail",
     ),
 ]

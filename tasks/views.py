@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .forms import SignupForm, TaskForm, TaskListForm
 from .models import Task, TaskList
-from .serializers import TaskSerializer
+from .serializers import TaskListSerializer, TaskSerializer
 
 
 def signup(request):
@@ -126,7 +126,19 @@ def task_delete(request, list_pk, pk):
     )
 
 
-class TaskListCreateAPIView(generics.ListCreateAPIView):
+class TaskCollectionAPIView(generics.ListCreateAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Task.objects.filter(task_list__user=self.request.user)
+        task_list_id = self.request.query_params.get("task_list")
+        if task_list_id:
+            queryset = queryset.filter(task_list_id=task_list_id)
+        return queryset
+
+
+class TaskDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
 
@@ -134,9 +146,20 @@ class TaskListCreateAPIView(generics.ListCreateAPIView):
         return Task.objects.filter(task_list__user=self.request.user)
 
 
-class TaskRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = TaskSerializer
+class TaskListCollectionAPIView(generics.ListCreateAPIView):
+    serializer_class = TaskListSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Task.objects.filter(task_list__user=self.request.user)
+        return TaskList.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class TaskListDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = TaskListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return TaskList.objects.filter(user=self.request.user)
