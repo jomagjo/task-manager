@@ -81,10 +81,14 @@
     micButtons.forEach(function (btn) {
       var field = document.getElementById(btn.dataset.target);
       var recognition = new SpeechRecognition();
-      recognition.continuous = true;
+      // continuous mode is unreliable on Android (duplicates finalized
+      // results) - chain single-shot sessions instead, restarting on each
+      // natural pause so it still feels continuous to the user.
+      recognition.continuous = false;
       recognition.interimResults = true;
 
       var listening = false;
+      var manualStop = false;
       var baseValue = "";
       var finalTranscript = "";
       var currentLang = "en-US";
@@ -117,29 +121,42 @@
         field.value = (baseValue ? baseValue + " " : "") + cleaned;
 
         if (stopDetected) {
+          manualStop = true;
           recognition.stop();
         }
       };
 
       recognition.onend = function () {
+        if (!manualStop) {
+          try {
+            recognition.start();
+            return;
+          } catch (e) {
+            // couldn't restart - fall through and reset the button
+          }
+        }
         listening = false;
+        manualStop = false;
         btn.classList.remove("listening");
         btn.textContent = "🎤";
       };
 
-      recognition.onerror = function () {
-        listening = false;
-        btn.classList.remove("listening");
-        btn.textContent = "🎤";
+      recognition.onerror = function (event) {
+        if (event.error === "no-speech" || event.error === "aborted") {
+          return;
+        }
+        manualStop = true;
       };
 
       btn.addEventListener("click", function () {
         if (listening) {
+          manualStop = true;
           recognition.stop();
           return;
         }
         baseValue = field.value.trim();
         finalTranscript = "";
+        manualStop = false;
         currentLang = langSelect.value;
         recognition.lang = currentLang;
         recognition.start();

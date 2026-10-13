@@ -142,10 +142,14 @@
     }
 
     var recognition = new SpeechRecognition();
-    recognition.continuous = true;
+    // continuous mode is unreliable on Android (duplicates finalized
+    // results) - chain single-shot sessions instead, restarting on each
+    // natural pause so it still feels continuous to the user.
+    recognition.continuous = false;
     recognition.interimResults = true;
 
     var listening = false;
+    var manualStop = false;
     var finalTranscript = "";
 
     recognition.onresult = function (event) {
@@ -165,22 +169,34 @@
     };
 
     recognition.onend = function () {
+      if (!manualStop) {
+        try {
+          recognition.start();
+          return;
+        } catch (e) {
+          // couldn't restart - fall through and reset the button
+        }
+      }
       listening = false;
+      manualStop = false;
       micBtn.classList.remove("listening");
       micBtn.textContent = "🎤";
     };
 
-    recognition.onerror = function () {
-      listening = false;
-      micBtn.classList.remove("listening");
-      micBtn.textContent = "🎤";
+    recognition.onerror = function (event) {
+      if (event.error === "no-speech" || event.error === "aborted") {
+        return;
+      }
+      manualStop = true;
     };
 
     micBtn.addEventListener("click", function () {
       if (listening) {
+        manualStop = true;
         recognition.stop();
         return;
       }
+      manualStop = false;
       finalTranscript = "";
       recognition.lang = langSelect.value;
       recognition.start();
