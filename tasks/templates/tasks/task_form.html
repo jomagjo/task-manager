@@ -86,30 +86,34 @@
 
       var listening = false;
       var baseValue = "";
+      var finalTranscript = "";
       var currentLang = "en-US";
 
       recognition.onresult = function (event) {
         var stopPhraseActive = currentLang === "en-US";
-        var transcript = "";
+        var interimTranscript = "";
         var stopDetected = false;
-        for (var i = 0; i < event.results.length; i++) {
-          var segment = event.results[i][0].transcript;
-          transcript += segment;
-          if (
-            stopPhraseActive &&
-            event.results[i].isFinal &&
-            containsStopPhrase(segment)
-          ) {
-            stopDetected = true;
+
+        for (var i = event.resultIndex; i < event.results.length; i++) {
+          var result = event.results[i];
+          var segment = result[0].transcript;
+          if (result.isFinal) {
+            finalTranscript += segment;
+            if (stopPhraseActive && containsStopPhrase(segment)) {
+              stopDetected = true;
+            }
+          } else {
+            interimTranscript += segment;
           }
         }
 
+        var combined = finalTranscript + interimTranscript;
         var cleaned = stopPhraseActive
-          ? transcript
+          ? combined
               .replace(STOP_PHRASE_PATTERN, "")
               .replace(/\s{2,}/g, " ")
               .trim()
-          : transcript;
+          : combined;
         field.value = (baseValue ? baseValue + " " : "") + cleaned;
 
         if (stopDetected) {
@@ -135,6 +139,7 @@
           return;
         }
         baseValue = field.value.trim();
+        finalTranscript = "";
         currentLang = langSelect.value;
         recognition.lang = currentLang;
         recognition.start();

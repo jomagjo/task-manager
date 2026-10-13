@@ -146,13 +146,21 @@
     recognition.interimResults = true;
 
     var listening = false;
+    var finalTranscript = "";
 
     recognition.onresult = function (event) {
-      var transcript = "";
-      for (var i = 0; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
+      var interimTranscript = "";
+
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        var result = event.results[i];
+        if (result.isFinal) {
+          finalTranscript += result[0].transcript;
+        } else {
+          interimTranscript += result[0].transcript;
+        }
       }
-      searchInput.value = transcript.trim();
+
+      searchInput.value = (finalTranscript + interimTranscript).trim();
       filterRows();
     };
 
@@ -173,6 +181,7 @@
         recognition.stop();
         return;
       }
+      finalTranscript = "";
       recognition.lang = langSelect.value;
       recognition.start();
       listening = true;
