@@ -31,6 +31,10 @@ git push
 ssh -i ~/.ssh/gcp_task_manager uchiha@35.255.84.113 "cd ~/task-manager && git pull && sudo docker compose --profile prod up -d --build web"
 ```
 
+## Password reset
+
+Deliberately not built as a self-service email flow — the signup form doesn't even collect an email address, so that would've been a bigger change (email required at signup, SMTP credentials, migrating existing accounts). Instead: a dedicated `admin` superuser account exists on the live site specifically for this. If a user forgets their password, an admin resets it directly via `/admin/` → Users → their account → set password. Don't propose building email-based reset unless the user asks for it again specifically.
+
 ## Known gotchas
 
 - An editor hook auto-reformats templates after every write. It can split a Django `{% %}` tag's closing bracket onto its own line, which Django 3.2 silently mis-parses (no error, the tag just doesn't work). See `design-system.md` for the specific incident. After editing a template, re-fetch the rendered page rather than trusting a template-parse check alone.
