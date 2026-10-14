@@ -1,8 +1,88 @@
-{% extends "base.html" %} {% block content %}
-<h1>Sign Up</h1>
-<form method="post">
-  {% csrf_token %} {{ form.non_field_errors }} {{ form.as_p }}
-  <button class="btn" type="submit">Sign Up</button>
-</form>
-<p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+{% extends "base.html" %} {% block extra_head %}
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&family=Urbanist:wght@600;700;800&display=swap"
+/>
+<style>
+  .auth-page {
+    --custard: #faf1a4;
+    --ink: #660721;
+    --brick: #bd4850;
+    --brick-hover: #a83b44;
+    --rule: #a78a54;
+    --field: #fff7ce;
+    --field-focus: #f8e998;
+    background: var(--custard);
+    color: var(--ink);
+    font-family: "Fira Sans", sans-serif;
+    padding: 40px 32px;
+    border-radius: 8px;
+  }
+  .auth-page h1 {
+    font-family: "Urbanist", sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    font-size: 2.5rem;
+    margin: 0 0 32px;
+  }
+  .auth-page form {
+    border-top: 2px solid rgba(167, 138, 84, 0.8);
+    border-bottom: 2px solid rgba(167, 138, 84, 0.8);
+    padding: 8px 0;
+  }
+  .auth-page form p {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(167, 138, 84, 0.5);
+    margin: 0;
+  }
+  .auth-page form p:last-of-type {
+    border-bottom: none;
+  }
+  .auth-page label {
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+  }
+  .auth-page input {
+    background: var(--field);
+    border: none;
+    padding: 12px 14px;
+    color: var(--ink);
+  }
+  .auth-page input:focus {
+    outline: 2px solid var(--brick);
+    outline-offset: 2px;
+    background: var(--field-focus);
+  }
+  .auth-page .btn {
+    background: var(--brick);
+    margin-top: 24px;
+    font-family: "Fira Sans", sans-serif;
+    font-weight: 600;
+  }
+  .auth-page .btn:hover {
+    background: var(--brick-hover);
+  }
+  .auth-page a {
+    color: var(--ink);
+    text-decoration-color: var(--brick);
+  }
+  .auth-page a:hover {
+    color: var(--brick);
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="auth-page">
+  <h1>Sign Up</h1>
+  <form method="post">
+    {% csrf_token %} {{ form.non_field_errors }} {{ form.as_p }}
+    <button class="btn" type="submit">Sign Up</button>
+  </form>
+  <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+</div>
 {% endblock %}
