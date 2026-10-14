@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Task Manager</title>
+    <title>MoreMe</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -170,30 +170,69 @@
       }
       .navbar {
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
         gap: 12px;
         padding: 12px 0;
         border-bottom: 1px solid #ddd;
         margin-bottom: 16px;
         font-size: 0.9em;
       }
+      .brand {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        min-width: 0;
+      }
+      .brand-name {
+        font-weight: 700;
+        font-size: 1.15em;
+        white-space: nowrap;
+      }
+      .brand-tagline {
+        color: #777;
+        font-size: 0.85em;
+        font-style: italic;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      @media (max-width: 480px) {
+        .brand-tagline {
+          display: none;
+        }
+      }
     </style>
     {% block extra_head %}{% endblock %}
   </head>
   <body>
     <div class="navbar">
-      {% if user.is_authenticated %}
-      <span>Logged in as <strong>{{ user.username }}</strong></span>
-      <form method="post" action="{% url 'logout' %}" style="margin: 0">
-        {% csrf_token %}
-        <button type="submit" class="btn" style="padding: 2px 10px">
-          Log Out
-        </button>
-      </form>
-      {% else %}
-      <a href="{% url 'login' %}">Log In</a>
-      <a href="{% url 'signup' %}">Sign Up</a>
-      {% endif %}
+      <div class="brand">
+        <span class="brand-name">MoreMe</span>
+        <span class="brand-tagline"
+          >Find a little more time to be more YOU</span
+        >
+      </div>
+      <div class="nav-links">
+        {% if user.is_authenticated %}
+        <span>Logged in as <strong>{{ user.username }}</strong></span>
+        <form method="post" action="{% url 'logout' %}" style="margin: 0">
+          {% csrf_token %}
+          <button type="submit" class="btn" style="padding: 2px 10px">
+            Log Out
+          </button>
+        </form>
+        {% else %}
+        <a href="{% url 'login' %}">Log In</a>
+        <a href="{% url 'signup' %}">Sign Up</a>
+        {% endif %}
+      </div>
     </div>
     {% block content %}{% endblock %}
   </body>
